@@ -1,0 +1,26 @@
+{
+  "name": "redis-aggregator",
+  "version": "1.0.3",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FranckErnewein/redis-aggregator.git"
+  },
+  "author": "Franck Ernewein",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/FranckErnewein/redis-aggregator/issues"
+  },
+  "homepage": "https://github.com/FranckErnewein/redis-aggregator#readme",
+  "dependencies": {
+    "node-aggregator": "^1.1.0"
+  },
+  "devDependencies": {
+    "chai": "^3.2.0",
+    "redis": "^0.12.1"
+  }
+}
