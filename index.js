@@ -18,16 +18,32 @@ function RedisAggregator(aggregator, init, client, key) {
     throw new Error('RedisAggregator do not support init function');
   }
 
+  this._objectMode = false;
+
   function redisWrapper(value, mem, cb) {
     var new_value = aggregator(value, mem);
-    client.set(key, new_value, function() {
+    var redis_value = new_value;
+    if (typeof new_value === 'object') {
+      redis_value = JSON.stringify(new_value);
+    }
+    client.set(key, redis_value, function() {
       cb(new_value);
     });
   }
 
   function initWrapper(cb) {
     client.get(key, function(err, value) {
-      cb(value || init);
+      if(value){
+        var val;
+        try{
+          val = JSON.parse(value);
+        }catch(e){
+          val = value; //fallback to string
+        }
+        cb(val);
+      }else{
+        cb(init);
+      }
     });
   }
 

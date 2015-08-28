@@ -47,7 +47,7 @@ describe('Aggregator', function() {
     client.set(KEY, 42, function() {
       var agg = new RedisAggregator(lambda, 0, client, KEY);
       agg.once('ready', function() {
-        expect(agg.value()).to.be.equal('42');
+        expect(agg.value()).to.be.equal(42);
         done();
       });
     });
@@ -90,6 +90,51 @@ describe('Aggregator', function() {
     agg.add(1);
     agg.add(1);
     agg.add(1);
+  });
+
+  it('should aggregate a list', function(done) {
+    var agg = new RedisAggregator(function(new_item, list) {
+      list.push(new_item);
+      return list;
+    }, [], client, KEY);
+    agg.add('a');
+    agg.add('b');
+    agg.add('c');
+    var i = 0;
+    agg.on('data', function() {
+      i++;
+      if (i === 3) {
+        client.get(KEY, function(err, v) {
+          expect(JSON.parse(v)).to.be.deep.equal(['a', 'b', 'c']);
+          expect(agg.value()).to.be.deep.equal(['a', 'b', 'c']);
+          done();
+        });
+      }
+    });
+  });
+
+  it('should initalize with a list from redis', function(done) {
+    var agg = new RedisAggregator(function(new_item, list) {
+      list.push(new_item);
+      return list;
+    }, [], client, KEY);
+    agg.add('a');
+    agg.add('b');
+    agg.add('c');
+    var i = 0;
+    agg.on('data', function() {
+      i++;
+      if (i === 3) {
+        var agg2 = new RedisAggregator(function(new_item, list) {
+          list.push(new_item);
+          return list;
+        }, [], client, KEY);
+        agg2.on('ready', function(){
+          expect(agg2.value()).to.be.deep.equal(['a', 'b', 'c']);
+          done();
+        });
+      }
+    });
   });
 
 });
