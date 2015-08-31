@@ -101,15 +101,18 @@ describe('Aggregator', function() {
     agg.add('b');
     agg.add('c');
     var i = 0;
-    agg.on('data', function() {
-      i++;
-      if (i === 3) {
-        client.get(KEY, function(err, v) {
-          expect(JSON.parse(v)).to.be.deep.equal(['a', 'b', 'c']);
-          expect(agg.value()).to.be.deep.equal(['a', 'b', 'c']);
-          done();
-        });
-      }
+    agg.on('ready', function() {
+      expect(agg._aggregated).to.be.deep.equal([]);
+      agg.on('data', function() {
+        i++;
+        if (i === 3) {
+          client.get(KEY, function(err, v) {
+            expect(JSON.parse(v)).to.be.deep.equal(['a', 'b', 'c']);
+            expect(agg.value()).to.be.deep.equal(['a', 'b', 'c']);
+            done();
+          });
+        }
+      });
     });
   });
 
@@ -129,7 +132,7 @@ describe('Aggregator', function() {
           list.push(new_item);
           return list;
         }, [], client, KEY);
-        agg2.on('ready', function(){
+        agg2.on('ready', function() {
           expect(agg2.value()).to.be.deep.equal(['a', 'b', 'c']);
           done();
         });
