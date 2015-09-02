@@ -37,10 +37,22 @@ describe('Aggregator', function() {
     }).to.throw('RedisAggregator need a redis key');
   });
 
-  it('should throw an error if initial value is a function', function() {
+  it('should throw an error if initial value is an async function', function() {
     expect(function() {
-      new RedisAggregator(lambda, lambda, client, KEY);
-    }).to.throw('RedisAggregator do not support init function');
+      new RedisAggregator(lambda, function(cb){
+        cb(45);  
+      }, client, KEY);
+    }).to.throw('RedisAggregator do not support async init function');
+  });
+
+  it('should init with an sync function', function(done){
+    var agg = new RedisAggregator(lambda, function(){
+      return 16 + 1;
+    }, client, KEY);
+    agg.once('ready', function(){
+      expect(agg.get()).to.be.equal(17);
+      done();
+    });
   });
 
   it('should init with redis value', function(done) {

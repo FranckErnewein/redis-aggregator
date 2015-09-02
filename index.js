@@ -13,13 +13,13 @@ function RedisAggregator(aggregator, init, client, key) {
     throw new Error('RedisAggregator need a redis key');
   }
 
-  if (typeof init === 'function') {
-    throw new Error('RedisAggregator do not support init function');
+  if (typeof init === 'function' && init.length > 0) {
+    throw new Error('RedisAggregator do not support async init function');
   }
 
   this.client = client;
   this.key = key;
-  this._defaultInitialValue = init;
+  this._defaultInitialValue = typeof init === 'function' ? init() : init;
 
   Aggregator.call(this, aggregator);
 }
